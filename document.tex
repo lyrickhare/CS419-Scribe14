@@ -1,0 +1,219 @@
+%
+% This is the LaTeX template file for lecture notes for CS294-8,
+% Computational Biology for Computer Scientists.  When preparing 
+% LaTeX notes for this class, please use this template.
+%
+% To familiarize yourself with this template, the body contains
+% some examples of its use.  Look them over.  Then you can
+% run LaTeX on this file.  After you have LaTeXed this file then
+% you can look over the result either by printing it out with
+% dvips or using xdvi.
+%
+% This template is based on the template for Prof. Sinclair's CS 270.
+
+\documentclass[11pt, twosides]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{xcolor}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+	%   \pagestyle{myheadings}
+	\thispagestyle{plain}
+	\newpage
+	\setcounter{lecnum}{#1}
+	\setcounter{page}{1}
+	\noindent
+	\begin{center}
+		\framebox{
+			\vbox{\vspace{2mm}
+				\hbox to 6.28in { {\bf CS 419M Introduction to Machine Learning
+						\hfill Spring 2021-22} }
+				\vspace{4mm}
+				\hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+				\vspace{2mm}
+				\hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+				\vspace{2mm}}
+		}
+	\end{center}
+	\markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+% \renewcommand{\cite}[1]{[#1]}
+% \def\beginrefs{\begin{list}%
+		%         {[\arabic{equation}]}{\usecounter{equation}
+			%          \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+			%          \setlength{\labelwidth}{1.6truecm}}}
+	% \def\endrefs{\end{list}}
+% \def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+% \newcommand{\fig}[3]{
+	% 			\vspace{#2}
+	% 			\begin{center}
+		% 			Figure \thelecnum.#1:~#3
+		% 			\end{center}
+	% 	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+% \newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\begin{document}
+	%FILL IN THE RIGHT INFO.
+	%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+	\lecture{14-1}{Gradiend Descent and Stochastic Gradient Descent Algo}{Abir De}{Lyric Khare}
+	%\lecture{x}{Title}{Abir De}{Group y}
+	
+	\section{Notifications}
+	The following topics are important for machine learning:
+	\begin{enumerate}
+		\item $25_{th} $March - Quiz
+		\item $16_{th}$ Mar $+23_{th}$ Mar $+1_{st}$ Apr (maybe) guest lecture from Dr. Ashish Tendulkar @Google
+		\item From $30_{th}$ March onwards- In person classes only, \textbf{No hybrid mode}
+		\item Next two weeks ($3_{rd}$ and $4_{th}$) week of March- 2 in person tutorial session 
+	\end{enumerate}
+	\section{Gradient Descent Algorithm}
+	\subsection{Statement}
+	In the last lecture; we saw the gradient descent algorithm.
+	\begin{align}
+		\theta_{t+1}&=\theta_t-\gamma\left[\frac{dl_{\theta}}{\theta}\right]_{\theta=\theta_t}\\
+		t&=1,2,3,\dots,T\\
+		\bar{\theta}&=\frac{\sum_{i=1}^{T}\theta_{i}}{T}
+	\end{align}
+		Now we assume, suppose the true optimum of the loss:
+		if
+	\[\theta^*=arg(\min_{\theta}l_{\theta})\]
+	then as $T\to \infty$,
+	\[l_{\bar{\theta}}-l_{\theta^*}\to 0\Rightarrow\bar{\theta}\to\theta^*\]
+	
+	\subsection{Proof}
+	To prove this let:
+	\[l_{\bar{\theta}}\equiv l(\bar{\theta})\]
+	using Jenson inequality,
+	\[l({\bar{\theta}})=l\left( \frac{\sum_{i=1}^{T}\theta_{i}}{T}\right) \leq  \frac{\sum_{i=1}^{T}l(\theta_{i})}{T}\]
+	Now
+	\begin{align}
+		 &l(\bar{\theta})-l({\theta}^*)\nonumber\\
+		 \leq &\frac{\sum_{i=1}^{T}l(\theta_{i})}{T}-l({\theta}^*)\nonumber\\
+		 =&\frac{1}{T}\sum_{i=1}^{T}\left(l(\theta_{i})-l({\theta}^*)\right)\nonumber\\
+		 \leq &\frac{1}{T}\sum_{i=1}^{T}(\theta_i-\theta^*)^T\left(\frac{dl(\theta)}{d\theta}\right)_{\theta=\theta_i}\nonumber\\
+		 \leq
+		 &\frac{1}{T}\left(\frac{1}{2\gamma}\|\theta^*\|^2+\frac{\gamma}{2}\sum_{i=1}^{T}u_i^2\right) \text{\ \ \ \ \ \ \ \           where }u_i=\left(\frac{dl(\theta)}{d\theta}\right)_{\theta=\theta_i}\nonumber\\
+		 =&\frac{1}{T}\left(\frac{1}{2\gamma}\beta^2+\frac{\gamma}{2}Tp^2\right)\text{\ \ \ \ \ \ \ }\|\theta^*\| \leq\beta, u_i\leq p \nonumber\\
+	\end{align}
+Now if $\gamma=T^\alpha$
+\[=\frac{\beta^2}{2T^{1-\alpha}}+\frac{p^2}{2T^\alpha}\]
+and lowest value of cofficient of $\beta^2+p^2$ will be at $\alpha=0.5$ \\
+i.e.
+\[l(\bar{\theta})-l({\theta}^*) \sim \mathcal{O}\left( max\left(\frac{1}{T^\alpha}-\frac{1}{T^{1-\alpha}}\right)\right) \] 
+
+\subsection{Time and Space trade-off}
+\subsubsection{Load, run and repeat}
+In this method an element (instance) of data is loaded in the RAM from HD, then loss is computed for that instance and added to $loss_{prev}$\\
+The loading from HD to RAM increases the computational time.\\
+
+\textbf{Pseudo code}\\
+\% D is dataset, i is an instance\\
+loss=0\\
+for \textbf{i} in \textbf{D}:\\
+\ \ load(i)\\
+\ \ loss=loss+ComputeLoss(i)\\
+\ \ return loss\\
+
+
+\subsubsection{Load all and then run}
+In this method all data is first loaded and then loss is computed which decrases the computational time but increases space requirement significacntly.\\
+
+\textbf{Pseudo code}\\
+\% D is dataset, i is an instance\\
+
+loss=0\\
+load(D)\\
+for \textbf{i} in \textbf{D}:\\
+\ \ loss=loss+ComputeLoss(i)\\
+\ \ return loss\\
+
+\textbf{\textit{or }}\\
+loss=0\\
+\hspace{\parindent} load(D)\\
+\hspace{\parindent} loss=ComputeLoss(D)
+
+
+\subsubsection{Minibatch GD}
+This is an optimised method which uses a batch size $B$ where $B\subset D$ to load in the RAM initially and then computes loss. $B$ is chosen as per space availability and then optimized for computational time too. 
+
+
+\subsection{Summary}
+\begin{itemize}
+	\item Gradient descent is a helpful algorithm for convex functions
+	\item Gradient descent has to converge at a rate or speed of $\mathcal{O}\left(\frac{1}{\sqrt{T}}\right)$
+	\item GD is prefered for 100 instances but not for $10^7$ instances because computation of the loss on the entire dataset consume a lot of memory (CPU/GPU/RAM) which is a con
+	\item Stochastic GD's pro is it uses one instace to compute gradient at each iteration
+	\item It is faster in most circumstances (for convexfunction) for computation of loss on whole dataset
+	\item In stochastic GD if $u_i$ is small then rate of convergence rate will go down
+\end{itemize}
+
+
+
+	\section{Group Details and Individual Contribution}
+		\begin{table}[h]
+		\centering
+		\begin{tabular}{|c||c|c|}
+			\hline
+			name & roll no. & sections \\
+			\hline
+			Lyric Khare & 20D170022 & 14.2.1,14.2.2, 14.2.4\\
+			\hline
+			Kulkarni Sneha Santosh & 200100090& 14.2.3\\
+			\hline
+			Nishkarsh Bansal & 200010052 & 14.1\\
+			\hline
+		\end{tabular}
+	\end{table}
+\end{document}
+
+
+
+
+
